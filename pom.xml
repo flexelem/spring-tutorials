@@ -9,6 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>spring-retry</module>
+        <module>spring-scheduled-job</module>
     </modules>
     <packaging>pom</packaging>
 
