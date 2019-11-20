@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,8 +18,10 @@ import java.io.IOException;
 @Component
 public class JWTRequestFilter extends OncePerRequestFilter {
 
+    private static String AUTHORIZATION_HEADER = "Authorization";
+
     @Autowired
-    private JWTTokenUtil jwtTokenUtil;
+    private JWTProvider jwtProvider;
 
     @Autowired
     private JWTUserDetailsService jwtUserDetailsService;
@@ -28,25 +29,29 @@ public class JWTRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String requestTokenHeader = request.getHeader("Authorization");
+        String jwt = resolveToken(request);
 
-        String username = null;
-        String jwtToken = null;
-
-        if (StringUtils.isNotBlank(requestTokenHeader)) {
-            jwtToken = requestTokenHeader.substring(7);
-            username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+        if (StringUtils.isNotBlank(jwt)) {
+            String username = jwtProvider.getSubject(jwt);
 
             if (StringUtils.isNotBlank(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(username);
-                if (jwtTokenUtil.validaToken(jwtToken, userDetails)) {
+                if (jwtProvider.validateToken(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(token);
                 }
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String resolveToken(HttpServletRequest request) {
+        String authToken = request.getHeader(AUTHORIZATION_HEADER);
+        if (StringUtils.isNotBlank(authToken) && authToken.startsWith("Bearer ")) {
+            return authToken.substring(7);
+        }
+
+        return null;
     }
 }

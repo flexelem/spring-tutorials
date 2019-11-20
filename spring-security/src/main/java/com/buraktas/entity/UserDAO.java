@@ -21,7 +21,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 public class UserDAO {
     @Id
-    @SequenceGenerator(name = "users_seq", sequenceName = "users_seq")
+    @SequenceGenerator(name = "users_seq", sequenceName = "users_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_seq")
     private Long id;
 
