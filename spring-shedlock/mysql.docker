@@ -1,0 +1,17 @@
+FROM ubuntu:xenial
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get -y install mysql-server-5.7
+
+ARG MYSQL_USER=buraktas
+ARG MYSQL_PASSWORD=123456
+ARG MYSQL_DATABASE=spring_shedlock_example
+
+ADD docker-init-mysql.sh /tmp/
+ADD schema.sql /tmp/
+ADD mysql-start.sh /tmp/
+
+RUN ["bash", "/tmp/docker-init-mysql.sh"]
+ENTRYPOINT ["bash", "/tmp/mysql-start.sh"]
+
+EXPOSE 3306

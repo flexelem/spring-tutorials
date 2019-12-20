@@ -1,0 +1,40 @@
+version: '3.2'
+services:
+  spring-shedlock-service_1:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - .:/spring-shedlock
+      - ~/.m2:/root/.m2
+    working_dir: /spring-shedlock
+    command:
+      - bash
+      - -c
+      - cd /spring-shedlock && mvn clean spring-boot:run
+    tty: true
+    ports:
+      - "8080:8080"
+
+  spring-shedlock-service_2:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - .:/spring-shedlock
+      - ~/.m2:/root/.m2
+    working_dir: /spring-shedlock
+    command:
+      - bash
+      - -c
+      - cd /spring-shedlock && mvn clean spring-boot:run
+    tty: true
+    ports:
+      - "8090:8090"
+
+  mysql:
+    build:
+      dockerfile: mysql.docker
+      context: .
+    ports:
+      - "3306:3306"

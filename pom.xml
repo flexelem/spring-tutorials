@@ -11,6 +11,7 @@
         <module>spring-retry</module>
         <module>spring-scheduled-job</module>
         <module>spring-security</module>
+        <module>spring-shedlock</module>
     </modules>
     <packaging>pom</packaging>
 
